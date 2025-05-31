@@ -1,0 +1,64 @@
+# microservices networked together
+
+services:
+  # spin up basic postgres db
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/hls_data
+    ports:
+      - "5432:5432"
+    networks:
+        - defaults
+
+  server:
+    container_name: server
+    build:
+      context: ./services/server
+      dockerfile: Dockerfile
+      target: ${MODE}
+    depends_on:
+      - postgres # wait till db is up
+    ports:
+      - "8080:8080"
+    networks:
+        - defaults
+    volumes:
+      - ./services/server:/app # so air will pickup changes
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+
+  
+  # files-service is a BLOB storage service (kinda like S3)
+  file-service:
+    container_name: file-service
+    build:
+      context: ./services/file-service/
+      dockerfile: Dockerfile
+      target: ${MODE}
+    depends_on:
+      - postgres # wait till db is up
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./services/file-service:/app # air pickup
+      - file_data:/data
+    networks:
+        - defaults
+
+volumes:
+  postgres_data:
+  file_data:
+
+networks:
+  defaults:
+    driver: bridge
