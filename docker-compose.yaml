@@ -19,8 +19,8 @@ services:
   server:
     container_name: server
     build:
-      context: ./services/server
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: server/Dockerfile
       target: ${MODE}
     depends_on:
       - postgres # wait till db is up
@@ -42,8 +42,8 @@ services:
   file-service:
     container_name: file-service
     build:
-      context: ./services/file-service/
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: file-service/Dockerfile
       target: ${MODE}
     depends_on:
       - postgres # wait till db is up

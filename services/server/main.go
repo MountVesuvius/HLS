@@ -5,7 +5,8 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"server/middleware"
+	"server/common/middleware"
+	"server/server/db"
 	// "server/db"
 )
 
@@ -31,22 +32,12 @@ func GetFile(w http.ResponseWriter, req *http.Request) {
 	w.Write(body)
 }
 
-func Example(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("This is an example"))
-}
-
-func Example2(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("special call"))
-}
-
+// won't keep routing in here forever i don't think, not sure yet
 func main() {
+	database := db.Connect()
+	db.Sync(database)
 	router := http.NewServeMux()
 	router.HandleFunc("GET /file/{id}", GetFile)
-	router.HandleFunc("GET /example", Example)
-
-	specialRouter := http.NewServeMux()
-	specialRouter.HandleFunc("GET /example2", Example2)
-	router.Handle("/", middleware.OnlyOnSome(specialRouter))
 
 	// create versioning
 	v1 := http.NewServeMux()
@@ -62,6 +53,6 @@ func main() {
 		Handler: applyMiddleware(v1),
 	}
 
-	log.Println("Starting server on :8080")
+	log.Println("Starting server")
 	server.ListenAndServe()
 }

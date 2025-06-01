@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"server/server/dto"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -23,8 +24,9 @@ func Connect() *gorm.DB {
     return db
 }
 
+// will move to migration scripts once i have a clear idea of how this will look
 func Sync(db *gorm.DB) {
-    err := db.AutoMigrate() // probabsy should actually sync something
+    err := db.AutoMigrate(&dto.File{})
     if err != nil {
         log.Fatal("Failed to sync database.", err)
     }

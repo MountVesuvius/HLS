@@ -12,13 +12,13 @@ RUN GOOS=linux GOARCH=amd64 go build -o main .
 
 # Stage 2: Development Environment with Hot Reload - Go 1.24
 FROM golang:1.24.3-alpine3.22 AS dev
-WORKDIR /app/file-service
+WORKDIR /app
 
 # Install air for hot reloading
 RUN go install github.com/air-verse/air@latest
 
 # Copy Go module files, download dependencies, copy application code
-COPY ../go.mod ../go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
